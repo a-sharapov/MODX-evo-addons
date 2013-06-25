@@ -1,0 +1,52 @@
+@charset "utf-8";
+
+.error-msg {
+float: left;
+margin: 0px;
+padding: 6px 10px 10px;
+width: 200px;
+background: rgba(150,0,0,.8);
+color: #ffe1e1;
+text-shadow: 0 1px 0 #a00;
+box-shadow: 0 1px 7px rgba(50,0,0,.3);
+border-radius: 5px;
+line-height: 12px;
+font-size: 11px;
+}
+.smicons {
+float: left;
+margin: 10px 0;
+}
+.smicons a {
+float: left;
+width: 32px;
+height: 32px;
+margin: 0 10px 0 0;
+padding: 0;
+opacity: .75;
+text-indent: -9999px;
+overflow: hidden;
+border-radius: 2px;
+border: none;
+}
+.smicons a.fb {
+background: url('icons.png') no-repeat 0 top;
+}
+.smicons a.gp {
+background: url('icons.png') no-repeat -32px top;
+}
+.smicons a.gg {
+background: url('icons.png') no-repeat -64px top;
+}
+.smicons a.od {
+background: url('icons.png') no-repeat -96px top;
+}
+.smicons a.tw {
+background: url('icons.png') no-repeat -128px top;
+}
+.smicons a.vk {
+background: url('icons.png') no-repeat -160px top;
+}
+.smicons a:hover {
+opacity: 1;
+}
