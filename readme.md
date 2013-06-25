@@ -1,5 +1,3 @@
-# MODX EVO addons by Alexander sharapov
-
 # Snippets:
 
 ## sRadio
