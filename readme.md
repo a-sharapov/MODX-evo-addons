@@ -45,6 +45,6 @@ Create quick edit links in main page of manager panel
 
 # Other:
 
-## QuickLinks
+## MODX Login
 [manager\media\style\common\login.tpl]
 Custom MODX Login page with build-in styles
