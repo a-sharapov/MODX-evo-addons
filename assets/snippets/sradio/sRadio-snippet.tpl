@@ -75,7 +75,7 @@ $smedia = Array(
 				),
 );
 
-$output .= '<div class="smicons">';
+$output .= '<!--noindex--><div class="smicons">';
 foreach ($smedia as $key => $value) {
 	if (in_array($key, $layoutarray)) {
 		if (!$tpl) {
@@ -87,7 +87,7 @@ foreach ($smedia as $key => $value) {
 		}
 	}
 }
-$output .= '</div>';
+$output .= '</div><!--/noindex-->';
 if (!$message) {
 	return $output;
 } else {
