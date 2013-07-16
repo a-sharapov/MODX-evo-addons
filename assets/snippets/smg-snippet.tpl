@@ -3,68 +3,92 @@
  *
  * Simple image Matrix Generator - MODx Evo Snippet
  *
- * @description: Простой сниппет генерации матрицы изображений из папки
+ * @description: <b>1.00</b> Простой сниппет генерации матрицы изображений из папки
  *
  * @category    snippet
- * @version     0.78
+ * @version     1.00
  * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author      Alex Sharapov
  *
- * Example: [[smg? &dir=`images/` &show=`6` &description=`image1;image2;image3;image4;image5;image6` &class=`images` &size=`200xauto` &wrapp=`id_1;id_2;id_3` &wrappout=`site_1.ru,site_2.ru,site_3.ru` &slider=`1`]]
+ * Example: [[smg? 	&src=`assets/images/gallery/`
+ *					&show=`number||all`
+ *					&size=`200x200`
+ *					&nopreview=`1`
+ *					&innerlinks=`ID` || &outerlinks=`http://sitename.com/`
+ *					&description=`desc1;desc2;desc3;...;descN`
+ *					&wrapperclass=`classname`
+ *					&innerclass=`classname`
+ * 			]]
  */
 
-$show = (isset($show)) ? $show : "";
-$size = (isset($size)) ? $size : "400x170";
-$class = (isset($class)) ? $class : "images-matrix";
-$nopreview = (isset($nopreview)) ? $nopreview : null;
-$description = (isset($description)) ? $description : null;
-$sizearr = explode("x", $size);
-$descriptionarr = explode(";", $description);
-$dire = $modx->config['rb_base_url'].$dir;
-$wrapp = (isset($wrapp)) ? $wrapp : null;
-$wrapparr = explode(";", $wrapp);
-$wrappout = (isset($wrappout)) ? $wrappout : null;
-$slider = (isset($slider)) ? $slider : null;
-$wrappoutarr = explode(";", $wrappout);
+// Parameters
+$src = (isset($src)) ? $src : "assets/images/";							// Sorce of files
+$show = (isset($show)) ? $show : ""; 										// Show-items counter
+$size = (isset($size)) ? $size : "200xauto";								// Size of images
+$nopreview = (isset($nopreview)) ? $nopreview : null;						// Add "nopreview" class
 
-	if (is_dir($dire)) {
-	$files = scandir($dire);
-	array_shift($files);
-	array_shift($files);
-	if ( $show == '' or $show == 'all' or $show > sizeof($files) ) { $imgcount = sizeof($files); } else { $imgcount = $show; }
-	if ( $nopreview ) { $addclass = 'class="nopreview"'; }
+$wrapperclass = (isset($wrapperclass)) ? $wrapperclass : "gallery";			// Wrapper class
+$innerclass = (isset($innerclass)) ? $innerclass : "gallery-item";			// Inner list class
+
+$description = (isset($description)) ? $description : null;					// Decription for images
+
+$innerlinks = (isset($innerlinks)) ? $innerlinks : null;					// IDs to generate inner links
+$outerlinks = (isset($outerlinks)) ? $outerlinks : null;					// Links to wrapp
+
+// type of out files
+$types = array('gif', 'jpg', 'jpeg', 'png', 'GIF', 'JPG', 'JPEG', 'PNG');
+
+// Inner parameters
+$size = explode("x", $size);
+if ( $description ) { $description = explode(";", $description); }
+if ( $innerlinks ) { $innerlinks = explode(";", $innerlinks); }
+if ( $outerlinks ) { $outerlinks = explode(";", $outerlinks); }
+
+// Gallery out
+if (is_dir($src)) {
+	$files = scandir($src);array_shift($files);array_shift($files);
+	// Get count of showing images
+	if ( $show == '' or $show == 'all' or $show > sizeof($files) ) {
+		$imgcount = sizeof($files);
+	} else {
+		$imgcount = $show;
+	}
+	// Get classes
+	if ( $nopreview ) { $imgclass = ' class="nopreview"'; }
+	$ulclass = ' class="'.$wrapperclass.'"';
+	$liclass = ' class="'.$innerclass.'"';
+
 	if(!empty($files)) {
-	if ( $slider ) { $output = '<div class="slider-wrapper">'; }
-		$output .= '<ul class="'.$class.'">';
+		$output .= '<div'.$ulclass.'>';
 		for($i=0; $i<$imgcount; $i++) {
-			$output .= '<li>';
-			if ($wrapp) { $output .= '<a href="'.$modx->makeUrl($wrapparr[$i]).'">'; }
-			if ($wrappout) { $output .= '<a target="_blank" rel="external nofollow" href="http://'.$wrappoutarr[$i].'/">'; }
+			$fileamp = explode(".", $files[$i]);
+			if ( in_array(end($fileamp), $types) && $fileamp[0] != '' ) {
+			$output .= '<figure'.$liclass.'>';
+			if ($innerlinks) { $output .= '<a href="'.$modx->makeUrl($innerlinks[$i]).'">'; }
+			if ($outerlinks) { $output .= '<a target="_blank" rel="external nofollow" href="'.$outerlinks[$i].'">'; }
+
 			if ($description) {
-				$output .= '<span class="description-wrapper">'.$descriptionarr[$i].'</span>';
-				$dscrptn = $descriptionarr[$i];
+				$output .= '<figcaption>'.$description[$i].'</figcaption>';
+				$dscrptn = $description[$i];
 			} else {
-				$dscrptn = 'Изображение '.$i;
+				$dscrptn = $wrapperclass.'-image-'.$i;
 			}
-			if ( $slider ) { $toitems .= '<span class="to-item'.$i.'" id="item'.$i.'">'.$i.'</span>'; }
-			$output .= '<img '.$addclass.' width="'.$sizearr[0].'"';
-			if ( $sizearr[1] != 'auto' ) {
- 				$output .= ' height="'.$sizearr[1].'"';
+
+			$output .= '<img '.$imgclass.' width="'.$size[0].'"';
+			if ( $size[1] != 'auto' ) {
+ 				$output .= ' height="'.$size[1].'"';
  			}
-			$output .= ' src="'.$modx->config['site_url'].$dire.$files[$i].'" alt="'.$dscrptn.'" />';
-			if ($wrapp or $wrappout) { $output .= '</a>'; }
-			$output .= '</li>';
+
+			$output .= ' src="'.$src.$files[$i].'" alt="'.$dscrptn.'" />';
+
+			if ($innerlinks or $outerlinks) { $output .= '</a>'; }
+			$output .= '</figure>';
+			}
 		}
-		$output .= '</ul>';
-		if ( $slider ) {
-			$output .= '	<div class="c-btns">
-					<span class="left-arrow" id="main-prev">&laquo;</span>
-					<span class="navi-all">'.$toitems.'</span>
-					<span class="right-arrow" id="main-next">&raquo;</span>
-				</div>
-			</div>';
-		}
-		} else $output = '<p>К сожалению в указанной папке изображения не найдены...</p>';
-	} else $output = '<p>Указанный каталог не найден...</p>';
+		$output .= '</div>';
+
+	} else $output = '<p>К сожалению в указанной папке изображения не найдены...</p>';
+} else $output = '<p>Указанный каталог не найден...</p>';
+
 return $output;
 ?>
