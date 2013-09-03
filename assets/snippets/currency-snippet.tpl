@@ -6,16 +6,18 @@
  * @description: <b>1.00</b> Генерация переключения валюты / Обработчик переключателя / Выполнение пересчета
  *
  * @category    snippet
- * @version     1.00
+ * @version     1.01
  * @license     http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author      Alex Sharapov
  *
  * Example: [!currency? &list=`usd,eur,rur`
  *						&mode=`links(default)|price`
- *						&rates=`chunk-name|1,1.3,0.03125`
+ *						&rates=`chunk-name|1,1.3,0.03125|xml`
  *						&price=`tv|chunk-name|string`
  *						&tpl=`inner(default)|chunk|clear`
  * 			!]
+ *
+ *			[!currency? &list=`usd,eur` &mode=`price` rates=`xml` &price=`50` &tpl=`clear`!]
  */
 
 // Parameters:
@@ -23,6 +25,8 @@ $list = (isset($list)) ? $list : "usd,eur,rur";
 $mode = (isset($mode)) ? $mode : "links";
 $rates = (isset($rates)) ? $rates : null;
 $price = (isset($price)) ? $price : null;
+
+$xmllink = (isset($xmllink)) ? $xmllink : "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
 $listarr = explode(",", $list);
 
@@ -57,6 +61,28 @@ switch ($mode) {
 		if ($rates) {
 			if ($modx->getChunk($rates)) {
 				$rates = $modx->getChunk($rates);
+			} else if ($rates == 'xml') {
+				// Cashing 12 hours
+				$filename = MODX_BASE_PATH.'assets/cache/cy.xml';
+				if (!file_exists($filename) || (file_exists($filename) && time() > filemtime($filename) + 60*60*12)) {
+						$file = file_get_contents($xmllink);
+						if ($file) {
+							file_put_contents($filename, $file);
+							@chmod($filename, 0666);
+						}
+				}
+				$xml = simplexml_load_file($filename); 
+				if ($xml != false) {
+					$rates = '1';
+					foreach ($listarr as $value) {
+						$value = strtoupper($value);
+						foreach($xml->Cube->Cube->Cube as $inxmlrate) {
+							if ( $inxmlrate['currency'] == $value ) {
+								$rates .= ','.$inxmlrate['rate'];
+							}
+						}
+					}
+				}
 			}
 			$ratesarr = explode(",", $rates);
 			$pracecur = array_combine($listarr, $ratesarr);
